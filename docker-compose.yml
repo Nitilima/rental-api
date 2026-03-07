@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      WEB_URL: ${WEB_URL:-*}
+      API_NAME: ${API_NAME:-API}
+    restart: unless-stopped

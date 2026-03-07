@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Movie {
+  id        String   @id @default(uuid())
+  title     String
+  synopsis  String?
+  poster    String? // URL da imagem
+  year      Int?
+  duration  Int?
+  rating    Float?
+  genre     Genre?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  directorId String?   @map("director_id")
+  director   Director? @relation(fields: [directorId], references: [id], onDelete: Restrict)
+  copies     Copy[]
+}
+
+enum Genre {
+  ACTION
+  ADVENTURE
+  ANIMATION
+  COMEDY
+  CRIME
+  DOCUMENTARY
+  DRAMA
+  FANTASY
+  HORROR
+  ROMANCE
+  SCIENCE_FICTION
+  THRILLER
+  WESTERN
+}
+
+model Director {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  movies Movie[]
+}
+
+model Customer {
+  id         String   @id @default(uuid())
+  name       String
+  email      String   @unique
+  phone      String?
+  keycloakId String?  @unique @map("keycloak_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  rentals Rental[]
+}
+
+model Copy {
+  id        String   @id @default(uuid())
+  movieId   String   @map("movie_id")
+  movie     Movie    @relation(fields: [movieId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  rentals Rental[]
+}
+
+model Rental {
+  id         String       @id @default(uuid())
+  customerId String       @map("customer_id")
+  customer   Customer     @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  copyId     String       @map("copy_id")
+  copy       Copy         @relation(fields: [copyId], references: [id], onDelete: Restrict)
+  rentedAt   DateTime     @default(now()) @map("rented_at")
+  dueDate    DateTime     @map("due_date") // data limite para devolução
+  returnedAt DateTime?    @map("returned_at") // null = ainda alugado
+  status     RentalStatus @default(ACTIVE)
+  createdAt  DateTime     @default(now()) @map("created_at")
+  updatedAt  DateTime     @updatedAt @map("updated_at")
+}
+
+enum RentalStatus {
+  ACTIVE // alugado
+  RETURNED // devolvido no prazo
+  OVERDUE // atrasado
+}
