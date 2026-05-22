@@ -5,7 +5,9 @@ RUN apk add --no-cache openssl
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npx prisma generate --no-engine
+ARG DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy
+ENV DATABASE_URL=${DATABASE_URL}
+RUN npx prisma generate
 RUN npm run build
 
 # Runtime
